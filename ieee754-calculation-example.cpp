@@ -28,12 +28,12 @@ uint8_t const bias = 127U;
 
 float float_builder(uint32_t mantissa, int exponent_bias, bool is_normalized)
 {
-    float fraction = mantissa / float(1 << 23);
+    float fractional = mantissa / float(1 << 23);
     if (is_normalized)
     {
-        fraction++;
+        fractional++;
     }
-    return fraction * pow(2, exponent_bias);
+    return fractional * pow(2, exponent_bias);
 }
 
 float ieee_754(uint32_t const data)
