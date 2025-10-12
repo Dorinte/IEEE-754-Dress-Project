@@ -26,12 +26,14 @@ uint8_t const bias = 127U;
  * Students should create or add any functions or classes they may need.
  */
 
-float float_builder(uint32_t mantissa, int exponent_bias, bool is_normalized) {
-    float frac = mantissa / static_cast<float>(1 << 23);
-    if (is_normalized) {
-        frac++;
+float float_builder(uint32_t mantissa, int exponent_bias, bool is_normalized)
+{
+    float fraction = mantissa / float(1 << 23);
+    if (is_normalized)
+    {
+        fraction++;
     }
-    return std::ldexp(frac, exponent_bias);
+    return fraction * pow(2, exponent_bias);
 }
 
 float ieee_754(uint32_t const data)
@@ -41,16 +43,19 @@ float ieee_754(uint32_t const data)
     uint32_t mantissa = data & 0x7FFFFF;
     float result;
 
-    if (exponent == 0) {
+    if (exponent == 0)
+    {
         // Denormalized number
-        result = float_builder(mantissa, -126, false);                    
+        result = float_builder(mantissa, -126, false);
     }
-    else {
+    else
+    {
         // Normalized number
-        result = float_builder(mantissa, exponent - 127, true);              
+        result = float_builder(mantissa, exponent - 127, true);
     }
 
-    if (sign) {
+    if (sign)
+    {
         result = -result;
     }
 
