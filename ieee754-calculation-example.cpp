@@ -25,19 +25,44 @@ uint8_t const bias = 127U;
  * Students should create or add any data structures needed.
  * Students should create or add any functions or classes they may need.
  */
-float ieee_754(uint32_t const data) {
-    float value;
-    // This will fail the tests. Students should do the proper IEEE-754 calculation per assignment
-    // using the 32 bit 'data' value passed into this function.
-    value = 1.23;
-    return value;
+
+float float_builder(uint32_t mantissa, int exponent_bias, bool is_normalized) {
+    float frac = mantissa / static_cast<float>(1 << 23);
+    if (is_normalized) {
+        frac++;
+    }
+    return std::ldexp(frac, exponent_bias);
+}
+
+float ieee_754(uint32_t const data)
+{
+    uint32_t sign = (data >> 31) & 0x1;
+    uint32_t exponent = (data >> 23) & 0xFF;
+    uint32_t mantissa = data & 0x7FFFFF;
+    float result;
+
+    if (exponent == 0) {
+        // Denormalized number
+        result = float_builder(mantissa, -126, false);                    
+    }
+    else {
+        // Normalized number
+        result = float_builder(mantissa, exponent - 127, true);              
+    }
+
+    if (sign) {
+        result = -result;
+    }
+
+    return result;
 }
 
 /*
  * *** STUDENTS SHOULD NOT NEED TO CHANGE THE CODE BELOW. IT IS A CUSTOM TEST HARNESS. ***
  */
 
-void header() {
+void header()
+{
     cout << left << setw(table_width[0]) << setfill(' ') << "pass/fail";
     cout << left << setw(table_width[1]) << setfill(' ') << "value";
     cout << left << setw(table_width[2]) << setfill(' ') << "bits";
@@ -49,7 +74,8 @@ void header() {
     cout << left << setw(table_width[3]) << setfill(' ') << "--------" << endl;
 }
 
-void print_row(bool const test_success, float const rand_val, uint32_t const val_int, float const ieee_754_value) {
+void print_row(bool const test_success, float const rand_val, uint32_t const val_int, float const ieee_754_value)
+{
     // print results
     string const pass_fail = test_success ? "PASS" : "FAIL";
     cout << left << setw(table_width[0]) << setfill(' ') << pass_fail;
@@ -59,15 +85,18 @@ void print_row(bool const test_success, float const rand_val, uint32_t const val
 }
 
 template <typename T>
-T rand_min_max(T const min, T const max) {
+T rand_min_max(T const min, T const max)
+{
     T const rand_val =
         min + static_cast<double>(static_cast<double>(rand())) / (static_cast<double>(RAND_MAX / (max - min)));
     return rand_val;
 }
 
-bool test() {
+bool test()
+{
     // the union
-    union float_uint {
+    union float_uint
+    {
         float val_float;
         uint32_t val_int;
     } data;
@@ -80,7 +109,8 @@ bool test() {
 
     bool success = true;
     uint16_t pass = 0;
-    for (size_t i = 0; i < NUM_TESTS; i++) {
+    for (size_t i = 0; i < NUM_TESTS; i++)
+    {
         // random value
         float const rand_val = rand_min_max<float>(MIN_VALUE, MAX_VALUE);
 
@@ -92,7 +122,8 @@ bool test() {
         // test the results
         float const epsilon = std::numeric_limits<float>::epsilon();
         bool test_success = (abs(ieee_754_value - rand_val) < epsilon);
-        if (test_success) {
+        if (test_success)
+        {
             pass += 1;
         }
 
@@ -102,9 +133,12 @@ bool test() {
 
     // summarize results
     cout << "-------------------------------------------" << endl;
-    if (pass == NUM_TESTS) {
+    if (pass == NUM_TESTS)
+    {
         cout << "SUCCESS ";
-    } else {
+    }
+    else
+    {
         cout << "FAILURE ";
     }
     cout << pass << "/" << NUM_TESTS << " passed" << endl;
@@ -113,8 +147,10 @@ bool test() {
     return success;
 }
 
-int main() {
-    if (!test()) {
+int main()
+{
+    if (!test())
+    {
         return -1;
     }
     return 0;
